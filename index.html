@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>FocusTube ELITE Pro</title>
     <style>
@@ -38,9 +40,36 @@
         #results { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
         .video-card { background: var(--glass); border-radius: 18px; padding: 10px; border: 1px solid var(--glass-border); cursor: pointer; }
         .video-card img { width: 100%; border-radius: 12px; }
-        #player-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; }
-        /* Purani Line 43 mita kar ye poora yahan daal de */
-iframe { width: 100%; aspect-ratio: 16/9; border-radius: 20px; border: 1px solid var(--accent); }
+        #player-container { 
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    background: #000; 
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+iframe { 
+    width: 100vw; 
+    aspect-ratio: 16/9; 
+    border: none; 
+}
+
+/* Flow Mode mein video ko poora failane ke liye */
+body.flow-mode #player-container {
+    padding: 0 !important;
+}
+
+body.flow-mode iframe {
+    width: 100vw;
+    height: 56.25vw;
+}
+
 
 /* Jab flow-mode active ho, tab in sabko chhupa do */
 body.flow-mode .glass-card:not(#player-container), 
