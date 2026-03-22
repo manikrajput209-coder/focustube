@@ -17,7 +17,7 @@
         .sound-chip { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 50px; color: white; margin: 5px; cursor: pointer; display: inline-block; }
         .sound-chip.active { background: var(--accent); color: black; }
         #results { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .video-card { background: var(--glass); border-radius: 18px; padding: 10px; border: 1px solid var(--glass-border); }
+        .video-card { background: var(--glass); border-radius: 18px; padding: 10px; border: 1px solid var(--glass-border); cursor: pointer; }
         .video-card img { width: 100%; border-radius: 12px; }
         #player-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; }
         iframe { width: 90%; aspect-ratio: 16/9; border-radius: 20px; border: 1px solid var(--accent); }
@@ -51,48 +51,70 @@
     </div>
     <audio id="rain" loop src="https://www.soundjay.com/nature/rain-07.mp3"></audio>
     <audio id="lofi" loop src="https://luan.xyz/files/audio/ambient_c_motion.mp3"></audio>
+
     <script>
         const API_KEY = 'AizaSyCqnvF-pofNZMuh17HxJah8LjtydavhFjM';
         let time = 2700, interval, xp = 0, lvl = 1;
+
         function toggleAudio(id, el) {
             const track = document.getElementById(id);
             if (track.paused) { track.play(); el.classList.add('active'); } 
             else { track.pause(); el.classList.remove('active'); }
         }
+
         async function searchVideos() {
             let q = document.getElementById("search").value;
             if(!q) return;
             try {
                 let res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)} oneshot&maxResults=10&type=video&key=${API_KEY}`);
                 let data = await res.json();
-                if(data.error) { alert("API Error: " + data.error.message); return; }
+                
+                if (data.error) {
+                    alert("Google API Alert: " + data.error.message);
+                    return;
+                }
+
                 let results = document.getElementById("results");
                 results.innerHTML = "";
+                
+                if (!data.items || data.items.length === 0) {
+                    alert("No videos found! Try another topic.");
+                    return;
+                }
+
                 data.items.forEach(v => {
-                    let d = document.createElement("div"); d.className = "video-card";
+                    let d = document.createElement("div");
+                    d.className = "video-card";
                     d.innerHTML = `<img src="${v.snippet.thumbnails.medium.url}"><p style="font-size:11px; margin-top:8px">${v.snippet.title}</p>`;
                     d.onclick = () => playVideo(v.id.videoId);
                     results.appendChild(d);
                 });
-            } catch (e) { alert("Network Error!"); }
+            } catch (e) {
+                alert("Network Error! Check connection.");
+            }
         }
+
         function playVideo(id) {
             document.getElementById("player-container").style.display = "flex";
             document.getElementById("player").innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" allow="autoplay; fullscreen" allowfullscreen webkitallowfullscreen></iframe>`;
         }
+
         function exitPlayer() {
             document.getElementById("player-container").style.display = "none";
             document.getElementById("player").innerHTML = "";
             document.body.classList.remove('flow-mode');
         }
+
         function startTimer() {
             clearInterval(interval);
             interval = setInterval(() => {
                 if (time > 0) {
-                    time--; let m = Math.floor(time / 60), s = time % 60;
+                    time--; 
+                    let m = Math.floor(time / 60), s = time % 60;
                     document.getElementById("timer").innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
                 } else {
-                    clearInterval(interval); xp += 100;
+                    clearInterval(interval); 
+                    xp += 100;
                     if(xp >= lvl * 500) { lvl++; xp = 0; alert("Level Up! Level " + lvl); }
                     document.getElementById("xp").innerText = xp;
                     document.getElementById("lvl").innerText = lvl;
@@ -100,7 +122,12 @@
                 }
             }, 1000);
         }
-        function resetTimer() { clearInterval(interval); time = 2700; document.getElementById("timer").innerText = "45:00"; }
+
+        function resetTimer() { 
+            clearInterval(interval); 
+            time = 2700; 
+            document.getElementById("timer").innerText = "45:00"; 
+        }
     </script>
 </body>
 </html>
