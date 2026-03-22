@@ -14,7 +14,6 @@
         #timer { font-size: 4rem; font-weight: 800; text-align: center; color: var(--accent); margin: 10px 0; }
         .stats { text-align: center; font-size: 0.9rem; color: var(--accent); margin-bottom: 10px; }
         .btn { background: var(--accent); border: none; padding: 12px 24px; border-radius: 14px; color: #000; font-weight: 700; cursor: pointer; margin: 5px; transition: 0.3s; }
-        .btn:active { transform: scale(0.95); }
         .sound-chip { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 50px; color: white; margin: 5px; cursor: pointer; display: inline-block; }
         .sound-chip.active { background: var(--accent); color: black; }
         #results { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
@@ -64,8 +63,9 @@
             let q = document.getElementById("search").value;
             if(!q) return;
             try {
-                let res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${q} oneshot&maxResults=10&type=video&key=${API_KEY}`);
+                let res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)} oneshot&maxResults=10&type=video&key=${API_KEY}`);
                 let data = await res.json();
+                if(data.error) { alert("API Error: " + data.error.message); return; }
                 let results = document.getElementById("results");
                 results.innerHTML = "";
                 data.items.forEach(v => {
@@ -74,7 +74,7 @@
                     d.onclick = () => playVideo(v.id.videoId);
                     results.appendChild(d);
                 });
-            } catch (e) { alert("API Error!"); }
+            } catch (e) { alert("Network Error!"); }
         }
         function playVideo(id) {
             document.getElementById("player-container").style.display = "flex";
