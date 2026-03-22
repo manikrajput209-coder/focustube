@@ -59,27 +59,37 @@ iframe {
     border: none; 
 }
 
-/* Flow Mode mein video ko poora failane ke liye */
-body.flow-mode #player-container {
-    padding: 0 !important;
+/* --- ISKO REPLACE KAR --- */
+#player-container { 
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    background: #000; 
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
-body.flow-mode iframe {
-    width: 100vw;
-    height: 56.25vw;
+iframe { width: 100vw; aspect-ratio: 16/9; border: none; }
+
+/* Jab flow-mode active ho */
+body.flow-mode .glass-card, 
+body.flow-mode h1, 
+body.flow-mode #results { 
+    display: none !important; 
 }
 
-
-/* Jab flow-mode active ho, tab in sabko chhupa do */
-body.flow-mode .glass-card:not(#player-container), 
-body.flow-mode h1 {
-    display: none !important;
+body.flow-mode #player-container { 
+    display: flex !important; 
+    padding: 0 !important; 
 }
 
-/* Video ko center mein rakhne ke liye */
-body.flow-mode #player-container {
-    padding-top: 10vh;
-}
+body.flow-mode iframe { width: 100vw; height: 56.25vw; }
+
 
     </style>
 </head>
@@ -105,7 +115,8 @@ body.flow-mode #player-container {
     <div id="player-container">
         <div id="player" style="width: 100%; display: flex; justify-content: center;"></div>
         <div style="margin-top:20px">
-            <button class="btn" style="background:#6c5ce7; color:white" onclick="document.body.classList.toggle('flow-mode')">🧘 Flow Mode</button>
+            <button class="btn" style="background:#6c5ce7; color:white" onclick="document.body.classList.toggle('flow-mode')">✨ Flow Mode</button>
+
             <button class="btn" style="background:#ff4757; color:white" onclick="exitPlayer()">Close</button>
         </div>
     </div>
@@ -161,7 +172,7 @@ function playVideo(id) {
     document.getElementById("player").innerHTML = `
         <iframe 
             src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1" 
-            style="width:95vw; height:53vw; border-radius:20px; border:2px solid #00d2ff;"
+            style="width:100vw; height:56.25vw; border-radius:20px; border:2px solid #00d2ff;"
             allow="autoplay; fullscreen">
         </iframe>`;
 }
