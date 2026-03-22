@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FocusTube ELITE</title>
+   <meta name="apple-mobile-web-app-capable" content="yes">
+ <title>FocusTube ELITE</title>
     <style>
         body { font-family: 'Segoe UI', Arial; background: #020617; color: white; text-align: center; padding: 20px; }
         .card { background: #1e293b; padding: 15px; border-radius: 12px; margin: 10px 0; border: 1px solid #334155; }
@@ -94,7 +95,7 @@
         }
 
         function playVideo(id) {
-            document.getElementById("player").innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0"allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+            document.getElementById("player").innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0"allow="autoplay; fullscreen" allowfullscreenwebkitallowfullscreen></iframe>`;
             document.getElementById("exitBtn").style.display = "inline-block";
             window.scrollTo(0, 0);
         }
