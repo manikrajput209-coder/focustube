@@ -93,11 +93,19 @@
                 alert("Network Error! Check connection.");
             }
         }
+function playVideo(id) {
+    document.getElementById("player-container").style.display = "flex";
+    document.getElementById("player").innerHTML = `
+        <iframe 
+            src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=1&modestbranding=1" 
+            allow="autoplay; fullscreen; picture-in-picture" 
+            allowfullscreen="true"
+            webkitallowfullscreen="true" 
+            mozallowfullscreen="true">
+        </iframe>`;
+}
 
-        function playVideo(id) {
-            document.getElementById("player-container").style.display = "flex";
-            document.getElementById("player").innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" allow="autoplay; fullscreen" allowfullscreen webkitallowfullscreen></iframe>`;
-        }
+        
 
         function exitPlayer() {
             document.getElementById("player-container").style.display = "none";
