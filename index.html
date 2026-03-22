@@ -94,7 +94,7 @@
         }
 
         function playVideo(id) {
-            document.getElementById("player").innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" allowfullscreen></iframe>`;
+            document.getElementById("player").innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0"allow="autoplay; fullscreen" allowfullscreen></iframe>`;
             document.getElementById("exitBtn").style.display = "inline-block";
             window.scrollTo(0, 0);
         }
