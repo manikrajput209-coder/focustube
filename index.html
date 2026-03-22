@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusTube ELITE</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial; background: #020617; color: white; text-align: center; padding: 20px; }
+        .card { background: #1e293b; padding: 15px; border-radius: 12px; margin: 10px 0; border: 1px solid #334155; }
+        button, select { padding: 10px 15px; margin: 5px; border-radius: 6px; border: none; background: #22c55e; color: white; font-weight: bold; cursor: pointer; }
+        input { padding: 10px; width: 70%; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; }
+        #results { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 20px; }
+        .video-card { background: #1e293b; padding: 5px; border-radius: 8px; font-size: 12px; cursor: pointer; }
+        iframe { width: 100%; height: 300px; border-radius: 12px; border: 2px solid #22c55e; }
+        #timer { font-size: 2rem; font-weight: bold; color: #22c55e; margin: 10px 0; }
+        .warning-text { color: #f87171; font-weight: bold; margin: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>🔥 FocusTube ELITE</h1>
+
+    <div class="card">
+        <input id="search" placeholder="Search study topics (e.g. Organic Chemistry)...">
+        <button onclick="searchVideos()">Search</button>
+        <br><br>
+        <select id="subject">
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Biology">Biology</option>
+        </select>
+    </div>
+
+    <div class="card">
+        <div id="timer">⏱ 45:00</div>
+        <button onclick="startTimer()">Start Session</button>
+        <button onclick="resetTimer()">Reset</button>
+    </div>
+
+    <div class="card">
+        <div>📊 Today: <span id="today">0</span> min | 🔥 Streak: <span id="streak">0</span></div>
+        <div>🎯 Target: <span id="target">180</span> min</div>
+        <div id="warning" class="warning-text"></div>
+        <div id="weak" style="color: #fbbf24; margin-top: 5px;"></div>
+    </div>
+
+    <div id="plan" class="card" style="white-space: pre-line; text-align: left;">
+        </div>
+
+    <div id="player-container">
+        <button onclick="exitPlayer()" style="background:#ef4444; display:none;" id="exitBtn">Close Player</button>
+        <div id="player"></div>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const API_KEY = "AIzaSyCqnvF-pofNZMuhl7HxJah8LjtydavhFjM"; // <--- 
+        let time = 2700;
+        let interval;
+        const banned = ["funny", "meme", "shorts", "prank", "edit", "reaction", "comedy"];
+        const syllabus = {
+            Physics: ["Mechanics", "Thermodynamics", "Optics", "Modern Physics"],
+            Chemistry: ["Organic", "Inorganic", "Physical"],
+            Biology: ["Botany", "Zoology"]
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        async function searchVideos() {
+            let q = document.getElementById("search").value;
+            if (!q) return;
+            if (banned.some(w => q.toLowerCase().includes(w))) {
+                alert("⚠️ Focus! Distractions are not allowed.");
+                return;
+            }
+
+            try {
+                let res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${q}&maxResults=12&type=video&key=${API_KEY}`);
+                let data = await res.json();
+                let results = document.getElementById("results");
+                results.innerHTML = "";
+
+                data.items.forEach(v => {
+                    let d = document.createElement("div");
+                    d.className = "video-card";
+                    d.innerHTML = `<img src="${v.snippet.thumbnails.medium.url}" width="100%"><p>${v.snippet.title}</p>`;
+                    d.onclick = () => playVideo(v.id.videoId);
+                    results.appendChild(d);
+                });
+            } catch (e) {
+                alert("API Error: Check your API Key or connection.");
+            }
+        }
+
+        function playVideo(id) {
+            document.getElementById("player").innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" allowfullscreen></iframe>`;
+            document.getElementById("exitBtn").style.display = "inline-block";
+            window.scrollTo(0, 0);
+        }
+
+        function exitPlayer() {
+            document.getElementById("player").innerHTML = "";
+            document.getElementById("exitBtn").style.display = "none";
+        }
+
+        // --- TIMER & TRACKING ---
+
+        function startTimer() {
+            clearInterval(interval);
+            interval = setInterval(() => {
+                if (time > 0) {
+                    time--;
+                    updateTimerDisplay();
+                    trackStudyTime();
+                } else {
+                    clearInterval(interval);
+                    alert("Session Complete! Take a break.");
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(interval);
+            time = 2700;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            let m = Math.floor(time / 60);
+            let s = time % 60;
+            document.getElementById("timer").innerText = `⏱ ${m}:${s < 10 ? "0" + s : s}`;
+        }
+
+        function trackStudyTime() {
+            let subj = document.getElementById("subject").value;
+            let today = new Date().toDateString();
+            let data = JSON.parse(localStorage.getItem("study") || "{}");
+
+            if (!data[today]) data[today] = { Physics: 0, Chemistry: 0, Biology: 0 };
+            data[today][subj]++;
+            
+            localStorage.setItem("study", JSON.stringify(data));
+            if(time % 10 === 0) updateStats(); // Update stats every 10 seconds to save performance
+        }
+
+        function updateStats() {
+            let data = JSON.parse(localStorage.getItem("study") || "{}");
+            let today = new Date().toDateString();
+            let totalSeconds = data[today] ? Object.values(data[today]).reduce((a, b) => a + b, 0) : 0;
+            let minutes = Math.floor(totalSeconds / 60);
+
+            document.getElementById("today").innerText = minutes;
+            
+            let streak = 0;
+            let d = new Date();
+            while (data[d.toDateString()]) {
+                streak++;
+                d.setDate(d.getDate() - 1);
+            }
+            document.getElementById("streak").innerText = streak;
+
+            let target = 180 + (streak * 10);
+            document.getElementById("target").innerText = target;
+
+            document.getElementById("warning").innerText = minutes < target / 2 ? "⚠️ You are behind. Fix it now." : "✅ Good pace. Keep going.";
+            
+            calculateWeakArea(data);
+        }
+
+        function calculateWeakArea(data) {
+            let totals = { Physics: 0, Chemistry: 0, Biology: 0 };
+            for (let day in data) {
+                for (let sub in totals) totals[sub] += data[day][sub] || 0;
+            }
+            let weakest = Object.entries(totals).sort((a, b) => a[1] - b[1])[0];
+            document.getElementById("weak").innerText = "⚠️ Weakest Area: " + weakest[0];
+        }
+
+        function generatePlan() {
+            let today = new Date().toDateString();
+            let planKey = "plan_" + today;
+            let plan = JSON.parse(localStorage.getItem(planKey));
+
+            if (!plan) {
+                plan = {};
+                for (let sub in syllabus) {
+                    let topics = syllabus[sub];
+                    plan[sub] = topics[Math.floor(Math.random() * topics.length)];
+                }
+                localStorage.setItem(planKey, JSON.stringify(plan));
+            }
+
+            let text = "🎯 Today's Mission:\n";
+            for (let sub in plan) text += `• ${sub}: ${plan[sub]}\n`;
+            document.getElementById("plan").innerText = text;
+        }
+
+        // Initialize
+        updateTimerDisplay();
+        updateStats();
+        generatePlan();
+
+    </script>
+</body>
+</html>
