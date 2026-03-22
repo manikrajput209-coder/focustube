@@ -9,7 +9,17 @@
         :root { --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); --accent: #00d2ff; }
         body { font-family: 'SF Pro Display', -apple-system, sans-serif; background: #0f172a; background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 100% 100%, hsla(225,39%,30%,1) 0, transparent 50%); background-attachment: fixed; color: white; margin: 0; padding: 20px; transition: 0.5s; }
         body.flow-mode .glass-card:not(#player-card), body.flow-mode h1 { display: none; }
-        .glass-card { background: var(--glass); backdrop-filter: blur(25px) saturate(200%); -webkit-backdrop-filter: blur(25px) saturate(200%); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; margin-bottom: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+        .glass-card { 
+    background: rgba(255, 255, 255, 0.03); 
+    backdrop-filter: blur(40px) saturate(180%); 
+    -webkit-backdrop-filter: blur(40px) saturate(180%); 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    border-radius: 30px; 
+    padding: 25px; 
+    margin-bottom: 20px; 
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
         h1 { text-align: center; font-weight: 700; }
         #timer { font-size: 4rem; font-weight: 800; text-align: center; color: var(--accent); margin: 10px 0; }
         .stats { text-align: center; font-size: 0.9rem; color: var(--accent); margin-bottom: 10px; }
