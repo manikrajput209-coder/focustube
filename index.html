@@ -3,205 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <meta name="apple-mobile-web-app-capable" content="yes">
- <title>FocusTube ELITE</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>FocusTube ELITE Pro</title>
     <style>
-        body { font-family: 'Segoe UI', Arial; background: #020617; color: white; text-align: center; padding: 20px; }
-        .card { background: #1e293b; padding: 15px; border-radius: 12px; margin: 10px 0; border: 1px solid #334155; }
-        button, select { padding: 10px 15px; margin: 5px; border-radius: 6px; border: none; background: #22c55e; color: white; font-weight: bold; cursor: pointer; }
-        input { padding: 10px; width: 70%; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; }
-        #results { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 20px; }
-        .video-card { background: #1e293b; padding: 5px; border-radius: 8px; font-size: 12px; cursor: pointer; }
-        iframe { width: 100%; height: 300px; border-radius: 12px; border: 2px solid #22c55e; }
-        #timer { font-size: 2rem; font-weight: bold; color: #22c55e; margin: 10px 0; }
-        .warning-text { color: #f87171; font-weight: bold; margin: 10px; }
+        :root {
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --accent: #00d2ff;
+            --gold: #ffd700;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at top right, #1e293b, #000000);
+            background-attachment: fixed;
+            color: white;
+            text-align: center;
+            margin: 0; padding: 20px;
+            min-height: 100vh;
+            transition: 0.5s;
+        }
+
+        /* Deep Work Mode */
+        body.deep-work .glass-card:not(#player-card), body.deep-work h1 {
+            display: none;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 15px auto;
+            max-width: 800px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        #timer { font-size: 3.5rem; font-weight: bold; color: var(--accent); margin: 10px 0; }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: white; font-weight: bold; cursor: pointer; margin: 5px;
+        }
+
+        .sound-btn { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); color: white; border-radius: 50px; padding: 8px 15px; cursor: pointer; font-size: 14px; }
+        .sound-btn.active { background: var(--accent); border-color: white; }
+
+        #results { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 20px; }
+        .video-card { background: var(--glass); border-radius: 12px; padding: 8px; cursor: pointer; transition: 0.3s; }
+        .video-card:hover { border: 1px solid var(--accent); }
+        .video-card img { width: 100%; border-radius: 8px; }
+
+        #player-container { display: none; margin-top: 20px; }
+        iframe { width: 100%; aspect-ratio: 16/9; border-radius: 15px; border: 2px solid var(--accent); }
+
+        .control-panel { margin-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
     </style>
 </head>
 <body>
 
-    <h1>🔥 FocusTube ELITE</h1>
+    <h1 id="main-title">🔥 FocusTube <span style="color:var(--accent)">ELITE Pro</span></h1>
 
-    <div class="card">
-        <input id="search" placeholder="Search study topics (e.g. Organic Chemistry)...">
-        <button onclick="searchVideos()">Search</button>
-        <br><br>
-        <select id="subject">
-            <option value="Physics">Physics</option>
-            <option value="Chemistry">Chemistry</option>
-            <option value="Biology">Biology</option>
-        </select>
+    <div class="glass-card">
+        <p style="margin-top:0; font-size:14px; color:var(--accent)">🎧 Soundscape</p>
+        <button class="sound-btn" onclick="toggleSound('rain', this)">🌧️ Rain</button>
+        <button class="sound-btn" onclick="toggleSound('lofi', this)">🎹 Lofi</button>
+        <button class="sound-btn" onclick="toggleSound('waves', this)">🌊 Waves</button>
     </div>
 
-    <div class="card">
-        <div id="timer">⏱ 45:00</div>
-        <button onclick="startTimer()">Start Session</button>
-        <button onclick="resetTimer()">Reset</button>
+    <div class="glass-card">
+        <div id="timer">45:00</div>
+        <button class="btn" onclick="startTimer()">Start Session</button>
+        <button class="btn" onclick="resetTimer()" style="background:gray">Reset</button>
+        <p style="font-size:12px; color:#cbd5e1">XP: <span id="xp">0</span> | Streak: 🔥 1</p>
     </div>
 
-    <div class="card">
-        <div>📊 Today: <span id="today">0</span> min | 🔥 Streak: <span id="streak">0</span></div>
-        <div>🎯 Target: <span id="target">180</span> min</div>
-        <div id="warning" class="warning-text"></div>
-        <div id="weak" style="color: #fbbf24; margin-top: 5px;"></div>
-    </div>
-
-    <div id="plan" class="card" style="white-space: pre-line; text-align: left;">
-        </div>
-
-    <div id="player-container">
-        <button onclick="exitPlayer()" style="background:#ef4444; display:none;" id="exitBtn">Close Player</button>
+    <div id="player-container" class="glass-card">
         <div id="player"></div>
+        <div class="control-panel">
+            <button class="btn" onclick="toggleDeepWork()" style="background:#6c5ce7">🧘 Flow Mode</button>
+            <button class="btn" onclick="markDoubt()" style="background:var(--gold); color:black">❓ Mark Doubt</button>
+            <button class="btn" onclick="exitPlayer()" style="background:#ff4757">Close</button>
+        </div>
+        <div id="doubt-list" style="font-size:12px; margin-top:10px; color:var(--gold)"></div>
+    </div>
+
+    <div class="glass-card">
+        <input id="search" placeholder="Search topics..." style="padding:10px; border-radius:8px; border:none; width:60%">
+        <button class="btn" onclick="searchVideos()">Search</button>
     </div>
 
     <div id="results"></div>
 
-    <script>
-        const API_KEY = "AIzaSyCqnvF-pofNZMuhl7HxJah8LjtydavhFjM"; // <--- 
+    <audio id="rain-audio" loop src="https://www.soundjay.com/nature/rain-07.mp3"></audio>
+    <audio id="lofi-audio" loop src="https://www.soundjay.com/misc/sounds/wind-chime-1.mp3"></audio> <script>
+        const API_KEY = 'YOUR_API_KEY_HERE'; // Bhai apni key yahan daal dena
         let time = 2700;
         let interval;
-        const banned = ["funny", "meme", "shorts", "prank", "edit", "reaction", "comedy"];
-        const syllabus = {
-            Physics: ["Mechanics", "Thermodynamics", "Optics", "Modern Physics"],
-            Chemistry: ["Organic", "Inorganic", "Physical"],
-            Biology: ["Botany", "Zoology"]
-        };
+        let xp = 0;
 
-        // --- CORE FUNCTIONS ---
+        function toggleSound(type, btn) {
+            const audio = document.getElementById(type + '-audio');
+            if (audio.paused) {
+                audio.play();
+                btn.classList.add('active');
+            } else {
+                audio.pause();
+                btn.classList.remove('active');
+            }
+        }
 
         async function searchVideos() {
             let q = document.getElementById("search").value;
-            if (!q) return;
-            if (banned.some(w => q.toLowerCase().includes(w))) {
-                alert("⚠️ Focus! Distractions are not allowed.");
-                return;
-            }
-
             try {
-                let res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${q}&maxResults=12&type=video&key=${API_KEY}`);
+                let res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${q} oneshot&maxResults=8&type=video&key=${API_KEY}`);
                 let data = await res.json();
                 let results = document.getElementById("results");
                 results.innerHTML = "";
-
                 data.items.forEach(v => {
                     let d = document.createElement("div");
                     d.className = "video-card";
-                    d.innerHTML = `<img src="${v.snippet.thumbnails.medium.url}" width="100%"><p>${v.snippet.title}</p>`;
+                    d.innerHTML = `<img src="${v.snippet.thumbnails.medium.url}"><p style="font-size:11px">${v.snippet.title}</p>`;
                     d.onclick = () => playVideo(v.id.videoId);
                     results.appendChild(d);
                 });
-            } catch (e) {
-                alert("API Error: Check your API Key or connection.");
-            }
+            } catch (e) { alert("API Error!"); }
         }
 
         function playVideo(id) {
-            document.getElementById("player").innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0"allow="autoplay; fullscreen" allowfullscreenwebkitallowfullscreen></iframe>`;
-            document.getElementById("exitBtn").style.display = "inline-block";
+            document.getElementById("player-container").style.display = "block";
+            document.getElementById("player").innerHTML = `<iframe id="yt-player" src="https://www.youtube.com/embed/${id}?enablejsapi=1&autoplay=1" allow="autoplay; fullscreen" allowfullscreen webkitallowfullscreen></iframe>`;
             window.scrollTo(0, 0);
         }
 
-        function exitPlayer() {
-            document.getElementById("player").innerHTML = "";
-            document.getElementById("exitBtn").style.display = "none";
+        function toggleDeepWork() {
+            document.body.classList.toggle('deep-work');
         }
 
-        // --- TIMER & TRACKING ---
+        function markDoubt() {
+            let now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById("doubt-list").innerHTML += `📍 Doubt at ${now} | `;
+        }
+
+        function exitPlayer() {
+            document.getElementById("player-container").style.display = "none";
+            document.getElementById("player").innerHTML = "";
+            document.body.classList.remove('deep-work');
+        }
 
         function startTimer() {
             clearInterval(interval);
             interval = setInterval(() => {
                 if (time > 0) {
                     time--;
-                    updateTimerDisplay();
-                    trackStudyTime();
+                    updateDisplay();
                 } else {
                     clearInterval(interval);
-                    alert("Session Complete! Take a break.");
+                    xp += 100;
+                    document.getElementById("xp").innerText = xp;
+                    alert("Focus Session Complete! +100 XP");
                 }
             }, 1000);
         }
 
-        function resetTimer() {
-            clearInterval(interval);
-            time = 2700;
-            updateTimerDisplay();
-        }
-
-        function updateTimerDisplay() {
+        function updateDisplay() {
             let m = Math.floor(time / 60);
             let s = time % 60;
-            document.getElementById("timer").innerText = `⏱ ${m}:${s < 10 ? "0" + s : s}`;
+            document.getElementById("timer").innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        function trackStudyTime() {
-            let subj = document.getElementById("subject").value;
-            let today = new Date().toDateString();
-            let data = JSON.parse(localStorage.getItem("study") || "{}");
-
-            if (!data[today]) data[today] = { Physics: 0, Chemistry: 0, Biology: 0 };
-            data[today][subj]++;
-            
-            localStorage.setItem("study", JSON.stringify(data));
-            if(time % 10 === 0) updateStats(); // Update stats every 10 seconds to save performance
-        }
-
-        function updateStats() {
-            let data = JSON.parse(localStorage.getItem("study") || "{}");
-            let today = new Date().toDateString();
-            let totalSeconds = data[today] ? Object.values(data[today]).reduce((a, b) => a + b, 0) : 0;
-            let minutes = Math.floor(totalSeconds / 60);
-
-            document.getElementById("today").innerText = minutes;
-            
-            let streak = 0;
-            let d = new Date();
-            while (data[d.toDateString()]) {
-                streak++;
-                d.setDate(d.getDate() - 1);
-            }
-            document.getElementById("streak").innerText = streak;
-
-            let target = 180 + (streak * 10);
-            document.getElementById("target").innerText = target;
-
-            document.getElementById("warning").innerText = minutes < target / 2 ? "⚠️ You are behind. Fix it now." : "✅ Good pace. Keep going.";
-            
-            calculateWeakArea(data);
-        }
-
-        function calculateWeakArea(data) {
-            let totals = { Physics: 0, Chemistry: 0, Biology: 0 };
-            for (let day in data) {
-                for (let sub in totals) totals[sub] += data[day][sub] || 0;
-            }
-            let weakest = Object.entries(totals).sort((a, b) => a[1] - b[1])[0];
-            document.getElementById("weak").innerText = "⚠️ Weakest Area: " + weakest[0];
-        }
-
-        function generatePlan() {
-            let today = new Date().toDateString();
-            let planKey = "plan_" + today;
-            let plan = JSON.parse(localStorage.getItem(planKey));
-
-            if (!plan) {
-                plan = {};
-                for (let sub in syllabus) {
-                    let topics = syllabus[sub];
-                    plan[sub] = topics[Math.floor(Math.random() * topics.length)];
-                }
-                localStorage.setItem(planKey, JSON.stringify(plan));
-            }
-
-            let text = "🎯 Today's Mission:\n";
-            for (let sub in plan) text += `• ${sub}: ${plan[sub]}\n`;
-            document.getElementById("plan").innerText = text;
-        }
-
-        // Initialize
-        updateTimerDisplay();
-        updateStats();
-        generatePlan();
-
+        function resetTimer() { clearInterval(interval); time = 2700; updateDisplay(); }
     </script>
 </body>
 </html>
